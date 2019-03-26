@@ -1,6 +1,7 @@
 package com.project.psedataconverter.apiconnector;
 
 import lombok.extern.log4j.Log4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -14,8 +15,10 @@ import java.util.List;
 
 @Log4j
 @Component
-public class PseApiConnector {
+@Qualifier("pseApiConnector")
+public class PseApiConnector implements ApiConnector{
 
+    @Override
     public List<String> getDataFromUrl(String startDate, String endDate) {
         List<String> dataFromUrl = new LinkedList<>();
         try {
@@ -38,9 +41,13 @@ public class PseApiConnector {
         } catch (MalformedURLException e) {
             log.error("URL is malformed!" + e.getMessage());
         } catch (IOException e) {
-            log.error("Open stream exception occurs" + e.getMessage());
+            log.error("Open stream exception occured" + e.getMessage());
         }
         return dataFromUrl;
+    }
 
+    @Override
+    public List<String> getDataFromUrl(String day) {
+        return this.getDataFromUrl(day, "");
     }
 }

@@ -1,13 +1,17 @@
 package com.project.psedataconverter.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.util.Date;
 
 //@Setter
 //@Getter
-//@NoArgsConstructor
+@NoArgsConstructor
 @Data
 @Entity
 public class DemandForPower {

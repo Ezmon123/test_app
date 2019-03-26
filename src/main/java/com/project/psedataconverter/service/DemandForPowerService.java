@@ -6,6 +6,8 @@ import com.project.psedataconverter.repository.DemandForPowerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class DemandForPowerService {
     private DemandForPowerRepository demandForPowerRepository;
@@ -20,7 +22,11 @@ public class DemandForPowerService {
         return demandForPowerRepository.save(demandForPower);
     }
 
-//    public Iterable<DemandForPower> findAllWhereActualPowerIsNull(){
-//        return demandForPowerRepository.findByActualPowerDemandIsNullAndOrderByDateOfMeasurement();
-//    }
+    public List<DemandForPower> findAllWhereActualPowerIsNull(){
+        return demandForPowerRepository.findByActualPowerDemandIsNullOrderByIdAsc();
+    }
+
+    public DemandForPower getLastRow(){
+        return demandForPowerRepository.findTopByOrderByIdDesc();
+    }
 }

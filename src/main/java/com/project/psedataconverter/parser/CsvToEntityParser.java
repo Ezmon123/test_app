@@ -17,13 +17,8 @@ import java.util.stream.Collectors;
 public class CsvToEntityParser {
     public List<DemandForPower> getDemandForPowerAsList(List<String> dataFromUrl) {
         dataFromUrl.remove(0);
-        for (String line : dataFromUrl) {
-            List<String> valuesInLine = Arrays.asList(line.split(";"));
-        }
         return dataFromUrl.stream()
-                .map(line -> {
-                    return Arrays.asList(line.split(";"));
-                })
+                .map(line -> Arrays.asList(line.split(";")))
                 .map(lineValues -> {
                     Date date = parseToData(lineValues.get(0), lineValues.get(1));
                     Double forecastOfPowerDemand = Double.valueOf(lineValues.get(2).replaceAll(",", "."));
@@ -40,10 +35,15 @@ public class CsvToEntityParser {
         if (hour.length() == 1) {
             hour = "0" + hour;
         }
+        String minutes = "00";
+        if (hour.equals("24")) {
+            hour = "23";
+            minutes = "59";
+        }
         Date fullDate = null;
         try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHH");
-            fullDate = dateFormat.parse(date + hour);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
+            fullDate = dateFormat.parse(date + hour + minutes);
         } catch (ParseException e) {
             log.error("Can not parse data! " + e.getMessage());
         }
