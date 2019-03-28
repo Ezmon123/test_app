@@ -22,6 +22,9 @@ public class DemandForPowerService {
         return demandForPowerRepository.save(demandForPower);
     }
 
+    public List<DemandForPower> saveAllDemandForPowerInDb(List<DemandForPower> demandForPowerAll) {
+        return (List<DemandForPower>) demandForPowerRepository.saveAll(demandForPowerAll);
+    }
     public List<DemandForPower> findAllWhereActualPowerIsNull(){
         return demandForPowerRepository.findByActualPowerDemandIsNullOrderByIdAsc();
     }

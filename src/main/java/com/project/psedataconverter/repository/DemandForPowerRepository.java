@@ -8,6 +8,7 @@ import java.util.List;
 
 @Repository
 public interface DemandForPowerRepository extends CrudRepository<DemandForPower, Long> {
+
     List<DemandForPower> findByActualPowerDemandIsNullOrderByIdAsc();
 
     DemandForPower findTopByOrderByIdDesc();

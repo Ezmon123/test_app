@@ -16,20 +16,28 @@ import java.util.List;
 @Log4j
 @Component
 @Qualifier("pseApiConnector")
-public class PseApiConnector implements ApiConnector{
+public class PseApiConnector implements ApiConnector {
 
     @Override
     public List<String> getDataFromUrl(String startDate, String endDate) {
         List<String> dataFromUrl = new LinkedList<>();
         try {
+            String urlString = "";
+            if (endDate == null) {
+                urlString = "https://www.pse.pl/obszary-dzialalnosci/krajowy-system-elektroenergetyczny/zapotrzebowanie-kse?" +
+                        "p_p_id=danekse_WAR_danekserbportlet&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_cacheability=cacheLevelPage&" +
+                        "p_p_col_id=column-2&p_p_col_count=1&_danekse_WAR_danekserbportlet_type=kse&_danekse_WAR_danekserbportlet_target=csv" +
+                        "&_danekse_WAR_danekserbportlet_from=" + startDate;
+            } else {
 //            String urlString = "https://www.pse.pl/dane-systemowe/funkcjonowanie-kse/raporty-dobowe-z-pracy-kse/zapotrzebowanie-mocy-kse?" +
 //                    "p_p_id=danekse_WAR_danekserbportlet&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_cacheability=cacheLevelPage&" +
 //                    "p_p_col_id=column-2&p_p_col_count=1&_danekse_WAR_danekserbportlet_type=kse&_danekse_WAR_danekserbportlet_target=csv&" +
 //                    "_danekse_WAR_danekserbportlet_from=1548975600000&_danekse_WAR_danekserbportlet_to=1551308400000";
-            String urlString = "https://www.pse.pl/obszary-dzialalnosci/krajowy-system-elektroenergetyczny/zapotrzebowanie-kse?" +
-                    "p_p_id=danekse_WAR_danekserbportlet&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_cacheability=cacheLevelPage&" +
-                    "p_p_col_id=column-2&p_p_col_count=1&_danekse_WAR_danekserbportlet_type=kse&_danekse_WAR_danekserbportlet_target=csv" +
-                    "&_danekse_WAR_danekserbportlet_from=1553209200000&_danekse_WAR_danekserbportlet_to=1553382000000";
+                urlString = "https://www.pse.pl/obszary-dzialalnosci/krajowy-system-elektroenergetyczny/zapotrzebowanie-kse?" +
+                        "p_p_id=danekse_WAR_danekserbportlet&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_cacheability=cacheLevelPage&" +
+                        "p_p_col_id=column-2&p_p_col_count=1&_danekse_WAR_danekserbportlet_type=kse&_danekse_WAR_danekserbportlet_target=csv" +
+                        "&_danekse_WAR_danekserbportlet_from=" + startDate + "&_danekse_WAR_danekserbportlet_to=" + endDate;
+            }
             URL url = new URL(urlString);
             BufferedReader csv = new BufferedReader(new InputStreamReader(url.openStream()));
             String line;
@@ -48,6 +56,6 @@ public class PseApiConnector implements ApiConnector{
 
     @Override
     public List<String> getDataFromUrl(String day) {
-        return this.getDataFromUrl(day, "");
+        return this.getDataFromUrl(day, null);
     }
 }

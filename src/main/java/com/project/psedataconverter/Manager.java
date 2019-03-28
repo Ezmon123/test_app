@@ -25,7 +25,7 @@ public class Manager {
     private DateParser dateParser;
 
     @Autowired
-    public Manager(@Qualifier("fileApiConnector") ApiConnector apiConnector, CsvToEntityParser csvToEntityParser,
+    public Manager(@Qualifier("pseApiConnector") ApiConnector apiConnector, CsvToEntityParser csvToEntityParser,
                    DemandForPowerService demandForPowerService, DateParser dateParser) {
         this.apiConnector = apiConnector;
         this.csvToEntityParser = csvToEntityParser;
@@ -34,55 +34,56 @@ public class Manager {
     }
 
     public void startTask() {
-        String fileName = "ZAP_KSE_20190322to20190324_20190324202504";
-        String firstDate = getDateOfLastActualPowerDemandMeasurement();
-        List<String> dataFromUrl = apiConnector.getDataFromUrl(fileName, "some data");
-        List<DemandForPower> demandForPowers = null;
-        if (!dataFromUrl.isEmpty()) {
-            demandForPowers = csvToEntityParser.getDemandForPowerAsList(dataFromUrl);
-        }
-        if (demandForPowers != null) {
-            demandForPowers
-                    .forEach(demandForPower -> demandForPowerService.saveDemandForPowerInDb(demandForPower));
-        }
-        tryToUpdateRecordsWithNullValues();
-        String s = "s";
-        log.info("c");
+        putInitDataIfDbIsEmpty();
+        updateRecordsOrAddNewRecords();
     }
 
-    public String getDateOfLastActualPowerDemandMeasurement() {
-        List<DemandForPower> allWhereActualPowerIsNull = demandForPowerService.findAllWhereActualPowerIsNull();
-        DemandForPower demandForPower = null;
-        if (allWhereActualPowerIsNull == null || allWhereActualPowerIsNull.isEmpty()) {
-            demandForPower = demandForPowerService.getLastRow();
-        } else {
-            demandForPower = allWhereActualPowerIsNull.get(0);
-        }
-        return null;
+    private void putInitDataIfDbIsEmpty() {
+        
+
     }
 
-    public void tryToUpdateRecordsWithNullValues() {
+    public void updateRecordsOrAddNewRecords() {
         List<DemandForPower> allWhereActualPowerIsNullDb = demandForPowerService.findAllWhereActualPowerIsNull();
         if (!allWhereActualPowerIsNullDb.isEmpty()) {
-            Date timeOfFirstNullMeasurement = allWhereActualPowerIsNullDb.get(0).getDateOfMeasurement();
-            String unixDateOfMeasurement = dateParser.convertDateToUnix(timeOfFirstNullMeasurement);
-            List<String> dataFromUrl = apiConnector.getDataFromUrl(unixDateOfMeasurement);
-            List<DemandForPower> demandForPowersInMeasurementDayUrl = csvToEntityParser.getDemandForPowerAsList(dataFromUrl);
-            removeDataFromUrlThatAlreadyExistInDatabase(timeOfFirstNullMeasurement, demandForPowersInMeasurementDayUrl);
-            updateRecords(allWhereActualPowerIsNullDb, demandForPowersInMeasurementDayUrl);
-            log.info("");
+            updateRecords(allWhereActualPowerIsNullDb);
         }else{
-            DemandForPower lastDemandForPowerEntity = demandForPowerService.getLastRow();
-            Date dateOfMeasurement = lastDemandForPowerEntity.getDateOfMeasurement();
-            String dateOfMeasurementUnix = dateParser.convertDateToUnix(dateOfMeasurement);
-            Date todayDate = new Date();
-            String todayDateUnix = dateParser.convertDateToUnix(todayDate);
-            List<String> dataFromUrl = apiConnector.getDataFromUrl(dateOfMeasurementUnix, todayDateUnix);
-            List<DemandForPower> demandForPowersInMeasurementDayUrl = csvToEntityParser.getDemandForPowerAsList(dataFromUrl);
-            removeDataFromUrlThatAlreadyExistInDatabase(dateOfMeasurement, demandForPowersInMeasurementDayUrl);
-            demandForPowersInMeasurementDayUrl.forEach(demandForPower -> demandForPowerService.saveDemandForPowerInDb(demandForPower));
+            addNewRecords();
         }
     }
+
+    /**
+     * time for last measurement in each day is 23:59, i must add two minutes to this time to ensure
+     * that application will download data from next day and add new records.
+     *
+     */
+    private void addNewRecords() {
+        DemandForPower lastDemandForPowerEntity = demandForPowerService.getLastRow();
+        Date dateOfMeasurement = lastDemandForPowerEntity.getDateOfMeasurement();
+        dateOfMeasurement = dateParser.addMinutesToDate(dateOfMeasurement, 2);
+        String dateOfMeasurementUnix = dateParser.convertDateToUnix(dateOfMeasurement);
+        Date realDate = new Date();
+        List<String> dataFromUrl;
+        if (realDate.getTime() - dateOfMeasurement.getTime() > 8640000) {
+            String realDateUnix = dateParser.convertDateToUnix(realDate);
+            dataFromUrl = apiConnector.getDataFromUrl(dateOfMeasurementUnix, realDateUnix);
+        }else{
+            dataFromUrl = apiConnector.getDataFromUrl(dateOfMeasurementUnix);
+        }
+        List<DemandForPower> demandForPowersInMeasurementDayUrl = csvToEntityParser.getDemandForPowerAsList(dataFromUrl);
+        removeDataFromUrlThatAlreadyExistInDatabase(dateOfMeasurement, demandForPowersInMeasurementDayUrl);
+        demandForPowersInMeasurementDayUrl.forEach(demandForPower -> demandForPowerService.saveDemandForPowerInDb(demandForPower));
+    }
+
+    private void updateRecords(List<DemandForPower> allWhereActualPowerIsNullDb) {
+        Date timeOfFirstNullMeasurement = allWhereActualPowerIsNullDb.get(0).getDateOfMeasurement();
+        String unixDateOfMeasurement = dateParser.convertDateToUnix(timeOfFirstNullMeasurement);
+        List<String> dataFromUrl = apiConnector.getDataFromUrl(unixDateOfMeasurement);
+        List<DemandForPower> demandForPowersInMeasurementDayUrl = csvToEntityParser.getDemandForPowerAsList(dataFromUrl);
+        removeDataFromUrlThatAlreadyExistInDatabase(timeOfFirstNullMeasurement, demandForPowersInMeasurementDayUrl);
+        updateRecords(allWhereActualPowerIsNullDb, demandForPowersInMeasurementDayUrl);
+    }
+
 
     private List<DemandForPower> removeDataFromUrlThatAlreadyExistInDatabase(Date timeOfMeasurementDb, List<DemandForPower> demandForPowersInMeasurementDayUrl) {
         Iterator<DemandForPower> iterator = demandForPowersInMeasurementDayUrl.listIterator();

@@ -14,10 +14,10 @@ import java.util.List;
 public class FileApiConnector implements ApiConnector{
     @Override
     public List<String> getDataFromUrl(String startDate, String endDate) {
-        startDate += ".txt";
         List<String> content = new LinkedList<>();
+        startDate = "C:\\Users\\01105039\\Desktop\\Programowanie\\Web development\\React and Spring\\vehicletogrid_app\\psedataconverter\\src\\test\\java\\com\\project\\psedataconverter\\testdbdata\\" + startDate + ".txt";
         try {
-            File file = new File("C:\\Users\\01105039\\Desktop\\Programowanie\\Web development\\React and Spring\\vehicletogrid_app\\psedataconverter\\dane\\" + startDate);
+            File file = new File(startDate);
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
             String line;
             while ((line = bufferedReader.readLine()) != null) {
