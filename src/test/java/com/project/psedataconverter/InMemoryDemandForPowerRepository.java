@@ -63,6 +63,16 @@ public class InMemoryDemandForPowerRepository implements DemandForPowerRepositor
     }
 
     @Override
+    public List<DemandForPower> findAll() {
+        List<DemandForPower> demandForPowerList = new ArrayList<>();
+        for (Long id : database.keySet()) {
+            demandForPowerList.add(database.get(id));
+        }
+        return demandForPowerList;
+    }
+
+
+    @Override
     public Optional<DemandForPower> findById(Long aLong) {
         return Optional.empty();
     }
@@ -70,11 +80,6 @@ public class InMemoryDemandForPowerRepository implements DemandForPowerRepositor
     @Override
     public boolean existsById(Long aLong) {
         return false;
-    }
-
-    @Override
-    public Iterable<DemandForPower> findAll() {
-        return null;
     }
 
     @Override

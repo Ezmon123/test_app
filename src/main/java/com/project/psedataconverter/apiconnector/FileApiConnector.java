@@ -13,11 +13,11 @@ import java.util.List;
 @Qualifier("fileApiConnector")
 public class FileApiConnector implements ApiConnector{
     @Override
-    public List<String> getDataFromUrl(String startDate, String endDate) {
+    public List<String> getDataFromUrl(String startDateUnix, String endDateUnix) {
         List<String> content = new LinkedList<>();
-        startDate = "C:\\Users\\01105039\\Desktop\\Programowanie\\Web development\\React and Spring\\vehicletogrid_app\\psedataconverter\\src\\test\\java\\com\\project\\psedataconverter\\testdbdata\\" + startDate + ".txt";
+        startDateUnix = "C:\\Users\\01105039\\Desktop\\Programowanie\\Web development\\React and Spring\\vehicletogrid_app\\psedataconverter\\src\\test\\java\\com\\project\\psedataconverter\\testdbdata\\" + startDateUnix + ".txt";
         try {
-            File file = new File(startDate);
+            File file = new File(startDateUnix);
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
             String line;
             while ((line = bufferedReader.readLine()) != null) {
@@ -34,7 +34,7 @@ public class FileApiConnector implements ApiConnector{
     }
 
     @Override
-    public List<String> getDataFromUrl(String day) {
-        return this.getDataFromUrl(day, null);
+    public List<String> getDataFromUrl(String dayUnix) {
+        return this.getDataFromUrl(dayUnix, null);
     }
 }

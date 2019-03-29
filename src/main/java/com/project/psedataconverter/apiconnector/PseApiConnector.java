@@ -19,15 +19,15 @@ import java.util.List;
 public class PseApiConnector implements ApiConnector {
 
     @Override
-    public List<String> getDataFromUrl(String startDate, String endDate) {
+    public List<String> getDataFromUrl(String startDateUnix, String endDateUnix) {
         List<String> dataFromUrl = new LinkedList<>();
         try {
             String urlString = "";
-            if (endDate == null) {
+            if (endDateUnix == null) {
                 urlString = "https://www.pse.pl/obszary-dzialalnosci/krajowy-system-elektroenergetyczny/zapotrzebowanie-kse?" +
                         "p_p_id=danekse_WAR_danekserbportlet&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_cacheability=cacheLevelPage&" +
                         "p_p_col_id=column-2&p_p_col_count=1&_danekse_WAR_danekserbportlet_type=kse&_danekse_WAR_danekserbportlet_target=csv" +
-                        "&_danekse_WAR_danekserbportlet_from=" + startDate;
+                        "&_danekse_WAR_danekserbportlet_from=" + startDateUnix;
             } else {
 //            String urlString = "https://www.pse.pl/dane-systemowe/funkcjonowanie-kse/raporty-dobowe-z-pracy-kse/zapotrzebowanie-mocy-kse?" +
 //                    "p_p_id=danekse_WAR_danekserbportlet&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_cacheability=cacheLevelPage&" +
@@ -36,15 +36,15 @@ public class PseApiConnector implements ApiConnector {
                 urlString = "https://www.pse.pl/obszary-dzialalnosci/krajowy-system-elektroenergetyczny/zapotrzebowanie-kse?" +
                         "p_p_id=danekse_WAR_danekserbportlet&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_cacheability=cacheLevelPage&" +
                         "p_p_col_id=column-2&p_p_col_count=1&_danekse_WAR_danekserbportlet_type=kse&_danekse_WAR_danekserbportlet_target=csv" +
-                        "&_danekse_WAR_danekserbportlet_from=" + startDate + "&_danekse_WAR_danekserbportlet_to=" + endDate;
+                        "&_danekse_WAR_danekserbportlet_from=" + startDateUnix + "&_danekse_WAR_danekserbportlet_to=" + endDateUnix;
             }
             URL url = new URL(urlString);
             BufferedReader csv = new BufferedReader(new InputStreamReader(url.openStream()));
             String line;
             while ((line = csv.readLine()) != null) {
                 dataFromUrl.add(line);
-                log.info(line);
             }
+            log.info("Connection to PSE API was successful");
 
         } catch (MalformedURLException e) {
             log.error("URL is malformed!" + e.getMessage());
@@ -55,7 +55,7 @@ public class PseApiConnector implements ApiConnector {
     }
 
     @Override
-    public List<String> getDataFromUrl(String day) {
-        return this.getDataFromUrl(day, null);
+    public List<String> getDataFromUrl(String dayUnix) {
+        return this.getDataFromUrl(dayUnix, null);
     }
 }

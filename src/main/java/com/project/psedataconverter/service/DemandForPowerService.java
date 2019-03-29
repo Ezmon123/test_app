@@ -32,4 +32,9 @@ public class DemandForPowerService {
     public DemandForPower getLastRow(){
         return demandForPowerRepository.findTopByOrderByIdDesc();
     }
+
+    public List<DemandForPower> findAll(){
+        return (List<DemandForPower>) demandForPowerRepository.findAll();
+
+    }
 }
