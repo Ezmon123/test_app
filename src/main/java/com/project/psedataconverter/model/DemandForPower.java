@@ -18,7 +18,7 @@ public class DemandForPower {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(updatable = false, unique = true)
+//    @Column(updatable = true, unique = true)
     private Date dateOfMeasurement;
     private Double forecastOfPowerDemand;
     private Double actualPowerDemand;

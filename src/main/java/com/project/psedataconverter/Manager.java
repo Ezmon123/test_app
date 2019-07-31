@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -36,8 +38,29 @@ public class Manager {
 
     @Scheduled(fixedRate = 900000)
     public void startTask() {
-        putInitDataIfDbIsEmpty();
-        updateRecordsOrAddNewRecords();
+        putTestRecords();
+//        putInitDataIfDbIsEmpty();
+//        updateRecordsOrAddNewRecords();
+    }
+
+    private void putTestRecords(){
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
+            Date dateOfMeasurement = dateFormat.parse("201903310100");
+            Date dateOfMeasurement1 = dateFormat.parse("201903310200");
+            Date dateOfMeasurement2 = dateFormat.parse("201903310300");
+            Date dateOfMeasurement3 = dateFormat.parse("201903310400");
+            log.info(dateOfMeasurement.toString());
+            log.info(dateOfMeasurement1.toString());
+            log.info(dateOfMeasurement2.toString());
+            log.info(dateOfMeasurement3.toString());
+            demandForPowerService.saveDemandForPowerInDb(new DemandForPower(dateOfMeasurement, 17000.0, 2000.0));
+            demandForPowerService.saveDemandForPowerInDb(new DemandForPower(dateOfMeasurement1, 17000.0, 2000.0));
+            demandForPowerService.saveDemandForPowerInDb(new DemandForPower(dateOfMeasurement2, 17000.0, 2000.0));
+            demandForPowerService.saveDemandForPowerInDb(new DemandForPower(dateOfMeasurement3, 17000.0, 2000.0));
+        } catch (ParseException e) {
+            log.error(e.getMessage());
+        }
     }
 
     private void putInitDataIfDbIsEmpty() {
@@ -75,12 +98,12 @@ public class Manager {
         Date realDate = new Date();
         List<String> dataFromUrl;
         if (realDate.getTime() - dateOfMeasurement.getTime() > 8640000) {
-            log.info("Last measurement was later than 24hours ago. Date of last measurement in Db: " + dateOfMeasurement.toString() +
-                    "Real date: " + realDate.toString());
+            log.info("Last measurement was later than 24 hours ago. Date of last measurement in Db: " + dateOfMeasurement.toString() +
+                    " Real date: " + realDate.toString());
             String realDateUnix = dateParser.convertDateToUnix(realDate);
             dataFromUrl = apiConnector.getDataFromUrl(dateOfMeasurementUnix, realDateUnix);
         } else {
-            log.info("Last measurement was sooner than 24hours ago Date of last measurement in Db: " + dateOfMeasurement.toString() +
+            log.info("Last measurement was sooner than 24 hours ago Date of last measurement in Db: " + dateOfMeasurement.toString() +
                     " Real date is: " + realDate.toString());
             dataFromUrl = apiConnector.getDataFromUrl(dateOfMeasurementUnix);
         }

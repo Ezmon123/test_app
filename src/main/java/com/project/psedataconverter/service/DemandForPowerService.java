@@ -4,6 +4,7 @@ package com.project.psedataconverter.service;
 import com.project.psedataconverter.model.DemandForPower;
 import com.project.psedataconverter.repository.DemandForPowerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,7 +20,14 @@ public class DemandForPowerService {
 
 
     public DemandForPower saveDemandForPowerInDb(DemandForPower demandForPower) {
-        return demandForPowerRepository.save(demandForPower);
+        try {
+
+            return demandForPowerRepository.save(demandForPower);
+        } catch (DataIntegrityViolationException e) {
+            System.out.println(demandForPower.toString());
+            e.printStackTrace();
+        }
+        return demandForPower;
     }
 
     public List<DemandForPower> saveAllDemandForPowerInDb(List<DemandForPower> demandForPowerAll) {

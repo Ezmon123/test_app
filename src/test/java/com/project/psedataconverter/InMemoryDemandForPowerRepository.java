@@ -2,8 +2,6 @@ package com.project.psedataconverter;
 
 import com.project.psedataconverter.model.DemandForPower;
 import com.project.psedataconverter.repository.DemandForPowerRepository;
-import com.project.psedataconverter.service.DemandForPowerService;
-import org.springframework.data.repository.CrudRepository;
 
 import java.util.*;
 
@@ -12,16 +10,17 @@ import java.util.*;
  * entity without id is treated as new entity,
  * enity with id is treated as entity that must be update
  */
-public class InMemoryDemandForPowerRepository implements DemandForPowerRepository{
+    public class InMemoryDemandForPowerRepository implements DemandForPowerRepository {
 
     protected Map<Long, DemandForPower> database = new LinkedHashMap<>();
 
     @Override
     public <S extends DemandForPower> List<S> saveAll(Iterable<S> entities) {
-        int size = (int)entities.spliterator().getExactSizeIfKnown();
-        Long counter =(long) 1;
+//        int size = (int)entities.spliterator().getExactSizeIfKnown();
+        Long counter = (long) 1;
         for (DemandForPower demandForPower : entities) {
             demandForPower.setId(counter);
+            demandForPower.setCreatedAt(new Date());
             database.put(counter, demandForPower);
             counter++;
         }
@@ -29,13 +28,15 @@ public class InMemoryDemandForPowerRepository implements DemandForPowerRepositor
     }
 
     @Override
-    public<S extends DemandForPower> S save(S demandForPower) {
+    public <S extends DemandForPower> S save(S demandForPower) {
         if (demandForPower.getId() == null) {
             int size = database.size();
             Long id = (long) size + 1;
             demandForPower.setId(id);
+            demandForPower.setCreatedAt(new Date());
             database.put(id, demandForPower);
         } else {
+            demandForPower.setUpdatedAt(new Date());
             database.replace(demandForPower.getId(), demandForPower);
         }
 
